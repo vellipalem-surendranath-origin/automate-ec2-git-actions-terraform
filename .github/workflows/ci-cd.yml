@@ -25,13 +25,13 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1  # Adjust region as needed
+          aws-region: ap-south-1  # Adjust region as needed
 
       - name: Create S3 Bucket for Terraform State
         run: |
           aws s3api create-bucket \
             --bucket medusa-terraform-state-bucket \
-            --region us-east-1
+            --region ap-south-1
 
           # Enable versioning on the S3 bucket
           aws s3api put-bucket-versioning \
@@ -46,8 +46,8 @@ jobs:
               --attribute-definitions AttributeName=LockID,AttributeType=S \
               --key-schema AttributeName=LockID,KeyType=HASH \
               --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
-              --region us-east-1
-          # TABLE_EXISTS=$(aws dynamodb list-tables --region us-east-1 --query "TableNames" --output text | grep -w $TABLE_NAME)
+              --region ap-south-1
+          # TABLE_EXISTS=$(aws dynamodb list-tables --region ap-south-1 --query "TableNames" --output text | grep -w $TABLE_NAME)
 
           # if [ -z "$TABLE_EXISTS" ]; then
           #   echo "Table does not exist. Creating the table..."
@@ -56,7 +56,7 @@ jobs:
           #     --attribute-definitions AttributeName=LockID,AttributeType=S \
           #     --key-schema AttributeName=LockID,KeyType=HASH \
           #     --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
-          #     --region us-east-1
+          #     --region ap-south-1
           # else
           #   echo "Table already exists. Skipping creation."
           # fi
@@ -69,36 +69,36 @@ jobs:
 
           aws dynamodb describe-table --table-name terraform-lock-table
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.5.0
+      # - name: Setup Terraform
+      #   uses: hashicorp/setup-terraform@v1
+      #   with:
+      #     terraform_version: 1.5.0
 
-      - name: Terraform Init
-        run: terraform init
-        working-directory: ./terraform
+      # - name: Terraform Init
+      #   run: terraform init
+      #   working-directory: ./terraform
 
-      - name: Terraform Plan
-        id: terraform-plan
-        run: terraform plan -var="db_username=${{ secrets.DB_USERNAME }}" -var="db_password=${{ secrets.DB_PASSWORD }}" -out=tfplan
-        working-directory: ./terraform
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      # - name: Terraform Plan
+      #   id: terraform-plan
+      #   run: terraform plan -var="db_username=${{ secrets.DB_USERNAME }}" -var="db_password=${{ secrets.DB_PASSWORD }}" -out=tfplan
+      #   working-directory: ./terraform
+      #   env:
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      #     DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
-      - name: Terraform Apply
-        if: github.event.inputs.action == 'apply'
-        run: terraform apply -auto-approve tfplan
-        working-directory: ./terraform
+      # - name: Terraform Apply
+      #   if: github.event.inputs.action == 'apply'
+      #   run: terraform apply -auto-approve tfplan
+      #   working-directory: ./terraform
 
-      - name: Terraform Destroy
-        if: github.event.inputs.action == 'destroy'
-        run: terraform destroy -auto-approve -var="db_username=${{ secrets.DB_USERNAME }}" -var="db_password=${{ secrets.DB_PASSWORD }}"
-        working-directory: ./terraform
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      # - name: Terraform Destroy
+      #   if: github.event.inputs.action == 'destroy'
+      #   run: terraform destroy -auto-approve -var="db_username=${{ secrets.DB_USERNAME }}" -var="db_password=${{ secrets.DB_PASSWORD }}"
+      #   working-directory: ./terraform
+      #   env:
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      #     DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
