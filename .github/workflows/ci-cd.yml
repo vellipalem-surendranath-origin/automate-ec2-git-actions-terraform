@@ -46,7 +46,9 @@ jobs:
 
       - name: Terraform Apply
         if: github.event.inputs.action == 'apply'
-        run: terraform apply -auto-approve tfplan
+        run: | 
+          terraform apply -auto-approve tfplan
+          terraform output -json > outputs.json
         working-directory: ./terraform
 
       - name: Terraform Destroy
@@ -65,9 +67,20 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.EC2_KEY }}
 
+      # Step 6: Read outputs from Terraform
+      - name: Read EC2 Outputs
+        id: ec2_outputs
+        run: |
+          echo "EC2_HOST=$(jq -r '.ec2_public_ip.value' outputs.json)" >> $GITHUB_ENV
+          echo "EC2_USER=$(jq -r '.ec2_ssh_user.value' outputs.json)" >> $GITHUB_ENV
+          echo "EC2_PORT=$(jq -r '.ec2_ssh_port.value' outputs.json)" >> $GITHUB_ENV
+
+
       - name: Update and Install Dependencies
         run: |
-          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+          echo "${{ secrets.EC2_KEY }}" > my_key.pem
+          chmod 600 my_key.pem  # Ensure proper permissions
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 -p ${{ env.EC2_PORT }} ${{ env.EC2_USER }}@${{ env.EC2_HOST }} << 'EOF'
             # Update and install necessary packages
             sudo apt-get update -y
             sudo apt-get upgrade -y
