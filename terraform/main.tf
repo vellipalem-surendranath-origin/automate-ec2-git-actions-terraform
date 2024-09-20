@@ -55,4 +55,8 @@ resource "aws_instance" "medusa_instance" {
   }
 }
 
+data "aws_instance" "medusa" {
+  instance_id = aws_instance.medusa_instance.id
+}
+
 
