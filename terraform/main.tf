@@ -2,7 +2,7 @@
 resource "aws_security_group" "ec2_sg" {
   name        = "ec2-security-group"
   description = "Allow SSH and HTTP"
-  vpc_id      = "vpc-0cd46a68be9301910"
+  vpc_id      = "vpc-0e77cbe60dfd345dd"
 
   ingress {
     from_port   = 22
