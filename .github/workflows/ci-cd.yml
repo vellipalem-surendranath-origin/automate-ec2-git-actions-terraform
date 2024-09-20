@@ -67,6 +67,7 @@ jobs:
           ssh-private-key: ${{ secrets.EC2_KEY }}
 
       - name: Update and Install Dependencies
+        if: github.event.inputs.action == 'apply'
         run: |
           ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 ubuntu@${{ env.EC2_HOST }} << 'EOF'
             # Update and install necessary packages
