@@ -31,6 +31,7 @@ jobs:
         uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: 1.5.0
+          terraform_wrapper: false
 
       - name: Terraform Init
         run: terraform init
@@ -71,8 +72,9 @@ jobs:
       - name: Read EC2 Outputs
         id: ec2_outputs
         run: |
-          echo "EC2_HOST=$(terraform output -raw ec2_public_ip)" >> $GITHUB_ENV
-          
+          echo "EC2_HOST=$(terraform output ec2_public_ip)" >> $GITHUB_ENV
+          echo ${{ env.EC2_HOST }}
+
       - name: Update and Install Dependencies
         run: |
           ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 ubuntu@${{ env.EC2_HOST }} << 'EOF'
