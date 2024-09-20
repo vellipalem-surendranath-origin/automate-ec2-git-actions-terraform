@@ -72,11 +72,10 @@ jobs:
         id: ec2_outputs
         run: |
           echo "EC2_HOST=$(terraform output -raw ec2_public_ip)" >> $GITHUB_ENV
-          echo "EC2_USER=$(terraform output -raw ec2_ssh_user)" >> $GITHUB_ENV
-
+          
       - name: Update and Install Dependencies
         run: |
-          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 ${{ env.EC2_USER }}@${{ env.EC2_HOST }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 ubuntu@${{ env.EC2_HOST }} << 'EOF'
             # Update and install necessary packages
             sudo apt-get update -y
             sudo apt-get upgrade -y
