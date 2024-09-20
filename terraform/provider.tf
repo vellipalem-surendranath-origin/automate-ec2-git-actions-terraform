@@ -13,9 +13,9 @@ terraform {
 
 terraform {
   backend "s3" {
-    bucket         = "medusa-terraform-state-bucket"
-    key            = "medusa-terraform.tfstate"
-    region         = "us-east-1"
+    bucket         = "medusa-task5-terraform-state-bucket"
+    key            = "medusa-terraform-automation.tfstate"
+    region         = "ap-south-1"
     dynamodb_table = "terraform-lock-table"
     encrypt        = true
   }
